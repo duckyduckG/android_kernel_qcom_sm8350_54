@@ -3401,7 +3401,6 @@ static int msm_be_hw_params_fixup(struct snd_soc_pcm_runtime *rtd,
 					SNDRV_PCM_HW_PARAM_RATE);
 	struct snd_interval *channels = hw_param_interval(params,
 					SNDRV_PCM_HW_PARAM_CHANNELS);
-	struct snd_soc_dai *codec_dai = rtd->codec_dai;
 
 	int rc = 0;
 	int idx;
@@ -3456,8 +3455,12 @@ static int msm_be_hw_params_fixup(struct snd_soc_pcm_runtime *rtd,
 		break;
 
 	case MSM_BACKEND_DAI_SLIMBUS_5_TX:
-		if (!strcmp(dev_name(codec_dai->dev), "tavil_codec"))
-			component = snd_soc_rtdcom_lookup(rtd, "tavil_codec");
+		component = snd_soc_rtdcom_lookup(rtd, "tavil_codec");
+		if (!component) {
+			pr_err("%s: component is NULL\n", __func__);
+			rc = -EINVAL;
+			goto done;
+		}
 
 		rate->min = rate->max = SAMPLING_RATE_16KHZ;
 		channels->min = channels->max = 1;
@@ -4004,8 +4007,11 @@ static int sm8150_notifier_service_cb(struct notifier_block *this,
 			goto err;
 		}
 		codec_dai = rtd->codec_dai;
-		if (!strcmp(dev_name(codec_dai->dev), "tavil_codec"))
-			component = snd_soc_rtdcom_lookup(rtd, "tavil_codec");
+		component = snd_soc_rtdcom_lookup(rtd, "tavil_codec");
+		if (!component) {
+			pr_err("%s: component is NULL\n", __func__);
+			return -EINVAL;
+		}
 
 		pdata = snd_soc_card_get_drvdata(card);
 		pdata->component = component;
@@ -4109,26 +4115,23 @@ static int msm_audrx_init(struct snd_soc_pcm_runtime *rtd)
 	snd_soc_dapm_ignore_suspend(dapm, "VIINPUT");	
 	snd_soc_dapm_ignore_suspend(dapm, "WDMA3_OUT");
 
-	if (!strcmp(dev_name(codec_dai->dev), "tavil_codec")) {
-		snd_soc_dapm_ignore_suspend(dapm, "Headset Mic");
-		snd_soc_dapm_ignore_suspend(dapm, "ANCRight Headset Mic");
-		snd_soc_dapm_ignore_suspend(dapm, "ANCLeft Headset Mic");
-		snd_soc_dapm_ignore_suspend(dapm, "Analog Mic5");
-		snd_soc_dapm_ignore_suspend(dapm, "LINEOUT1");
-		snd_soc_dapm_ignore_suspend(dapm, "LINEOUT2");
-		snd_soc_dapm_ignore_suspend(dapm, "HPHL");
-		snd_soc_dapm_ignore_suspend(dapm, "HPHR");
-		snd_soc_dapm_ignore_suspend(dapm, "ANC HPHL");
-		snd_soc_dapm_ignore_suspend(dapm, "ANC HPHR");
-	}
+	snd_soc_dapm_ignore_suspend(dapm, "Headset Mic");
+	snd_soc_dapm_ignore_suspend(dapm, "ANCRight Headset Mic");
+	snd_soc_dapm_ignore_suspend(dapm, "ANCLeft Headset Mic");
+	snd_soc_dapm_ignore_suspend(dapm, "Analog Mic5");
+	snd_soc_dapm_ignore_suspend(dapm, "LINEOUT1");
+	snd_soc_dapm_ignore_suspend(dapm, "LINEOUT2");
+	snd_soc_dapm_ignore_suspend(dapm, "HPHL");
+	snd_soc_dapm_ignore_suspend(dapm, "HPHR");
+	snd_soc_dapm_ignore_suspend(dapm, "ANC HPHL");
+	snd_soc_dapm_ignore_suspend(dapm, "ANC HPHR");
 
 	snd_soc_dapm_sync(dapm);
 
 	snd_soc_dai_set_channel_map(codec_dai, ARRAY_SIZE(tx_ch),
 				    tx_ch, ARRAY_SIZE(rx_ch), rx_ch);
 
-	if (!strcmp(dev_name(codec_dai->dev), "tavil_codec"))
-		msm_codec_fn.get_afe_config_fn = tavil_get_afe_config;
+	msm_codec_fn.get_afe_config_fn = tavil_get_afe_config;
 
 	ret = msm_adsp_power_up_config(component, rtd->card->snd_card);
 	if (ret) {
@@ -4153,7 +4156,6 @@ static int msm_audrx_init(struct snd_soc_pcm_runtime *rtd)
 	 */
 	pr_debug("%s: Number of aux devices: %d\n",
 		__func__, rtd->card->num_aux_devs);
-	if (!strcmp(dev_name(codec_dai->dev), "tavil_codec")) {
 		if (rtd->card->num_aux_devs &&
 		    !list_empty(&rtd->card->component_dev_list)) {
 			aux_comp = list_first_entry(
@@ -4180,7 +4182,7 @@ static int msm_audrx_init(struct snd_soc_pcm_runtime *rtd)
 		pdata->codec_root = entry;
 		tavil_codec_info_create_codec_entry(pdata->codec_root,
 				component);
-	}
+
 done:
 	codec_reg_done = true;
 	return 0;
@@ -6669,7 +6671,6 @@ static int msm_init_wsa_dev(struct platform_device *pdev,
 	u32 wsa_dev_cnt;
 	int i;
 	struct msm_wsa881x_dev_info *wsa881x_dev_info;
-	struct snd_soc_component *component;
 	struct snd_soc_dai_link_component *dlc;
 	const char *wsa_auxdev_name_prefix[1];
 	char *dev_name_str = NULL;
