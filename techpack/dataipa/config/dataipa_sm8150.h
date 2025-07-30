@@ -4,7 +4,7 @@
  * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
-#define CONFIG_GSI 0
+#define CONFIG_GSI 1
 #define CONFIG_GSI_REGISTER_VERSION_2 0
 #define CONFIG_RMNET_IPA3 1
 #define CONFIG_RNDIS_IPA 1
