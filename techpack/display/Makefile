@@ -60,6 +60,16 @@ ifeq ($(CONFIG_ARCH_MONACO), y)
 LINUXINCLUDE    += -include $(srctree)/techpack/display/config/monacodispconf.h
 endif
 
+ifeq ($(CONFIG_ARCH_SM8150), y)
+     ifeq ($(CONFIG_QGKI), y)
+		include $(srctree)/techpack/display/config/konadisp.conf
+LINUXINCLUDE    += -include $(srctree)/techpack/display/config/konadispconf.h
+     else
+		include $(srctree)/techpack/display/config/gki_konadisp.conf
+LINUXINCLUDE    += -include $(srctree)/techpack/display/config/gki_konadispconf.h
+     endif
+endif
+
 obj-$(CONFIG_DRM_MSM) += msm/
 
 ifeq ($(CONFIG_ARCH_SDXLEMUR), y)
