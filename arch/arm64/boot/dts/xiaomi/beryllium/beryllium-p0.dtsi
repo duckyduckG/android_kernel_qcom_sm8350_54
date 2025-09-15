@@ -472,7 +472,7 @@
 
 	backlight_therm {
 		label = "backlight_therm";
-		reg = <ADC_GPIO1_PU2>;
+		reg = <ADC5_GPIO1_100K_PU>;
 		qcom,hw-settle-time = <200>;
 		qcom,pre-scaling = <1 1>;
 	};
@@ -481,7 +481,7 @@
 &pm8998_adc_tm {
 	backlight_therm {
 		label = "backlight_therm";
-		reg = <ADC_GPIO1_PU2>;
+		reg = <ADC5_GPIO1_100K_PU>;
 		qcom,pre-scaling = <1 1>;
 		qcom,hw-settle-time = <200>;
 		qcom,btm-channel-number = <0x98>;
@@ -493,7 +493,7 @@
 	backlight_therm {
 		polling-delay-passive = <0>;
 		polling-delay = <0>;
-		thermal-sensors = <&pm8998_adc_tm ADC_GPIO1_PU2>;
+		thermal-sensors = <&pm8998_adc_tm ADC5_GPIO1_100K_PU>;
 		thermal-governor = "user_space";
 		wake-capable-sensor;
 
