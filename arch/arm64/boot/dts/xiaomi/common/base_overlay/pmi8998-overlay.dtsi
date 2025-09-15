@@ -1,0 +1,19 @@
+&pmi8998_fg {
+    /delete-property/ qcom,hold-soc-while-full;
+};
+
+#ifndef CONFIG_BACKLIGHT_QCOM_WLED_MAINLINE
+&pmi8998_wled {
+    /delete-property/ qcom,auto-calibration;
+};
+#endif
+
+&pmi8998_torch0 {
+    qcom,max-current = <300>;
+    qcom,current-ma = <75>;
+};
+
+&pmi8998_torch1 {
+    qcom,max-current = <300>;
+    qcom,current-ma = <75>;
+};

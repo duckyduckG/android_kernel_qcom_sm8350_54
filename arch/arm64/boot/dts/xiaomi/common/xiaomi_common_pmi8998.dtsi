@@ -1,0 +1,7 @@
+&pmi8998_rgb_led {
+    red {
+        label = "white";
+    };
+    /delete-node/ green;
+    /delete-node/ blue;
+};
