@@ -305,12 +305,32 @@
 		<&pmi8998_rradc 10>,
 		<&pmi8998_rradc 3>,
 		<&pmi8998_rradc 4>,
-		<&pmi8998_rradc 5>;
+		<&pmi8998_rradc 5>,
+		<&pmi8998_fg PSY_IIO_DEBUG_BATTERY>,
+		<&pmi8998_fg PSY_IIO_CAPACITY>,
+		<&pmi8998_fg PSY_IIO_VOLTAGE_NOW>,
+		<&pmi8998_fg PSY_IIO_CURRENT_NOW>,
+		<&pmi8998_fg PSY_IIO_CHARGE_FULL>,
+		<&pmi8998_fg PSY_IIO_CHARGE_COUNTER>,
+		<&pmi8998_fg PSY_IIO_CYCLE_COUNT>,
+		<&pmi8998_fg PSY_IIO_CHARGE_FULL_DESIGN>,
+		<&pmi8998_fg PSY_IIO_TIME_TO_FULL_NOW>,
+		<&pmi8998_fg PSY_IIO_TEMP>;
 	io-channel-names = "charger_temp",
 		"charger_temp_max",
 		"usbin_i",
 		"usbin_v",
-		"dcin_i";
+		"dcin_i",
+		"debug_battery",
+		"capacity",
+		"voltage_now",
+		"current_now",
+		"charge_full",
+		"charge_counter",
+		"cycle_count",
+		"charge_full_design",
+		"time_to_full_now",
+		"temp";
 };
 
 &pmi8998_fg {
