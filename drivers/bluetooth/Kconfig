@@ -462,4 +462,12 @@ config BTFM_SLIM
 		Say Y here to compile support for Bluetooth slimbus driver
 		into the kernel or say M to compile as a module.
 
+config BTFM_SLIM_WCN3990
+	bool "MSM Bluetooth/FM WCN3990 Device"
+	select BTFM_SLIM
+	help
+	  This enables specific driver handle for WCN3990 device.
+	  It is designed to adapt any future BT/FM device to implement a specific
+	  chip initialization process and control.
+
 endmenu
