@@ -2880,10 +2880,10 @@
 		qcom_cedev_s_cb {
 			compatible = "qcom,qcedev,context-bank";
 			label = "secure_context";
-			iommus = <&apps_smmu 0x713 0>,
-			       <&apps_smmu 0x71c 0>,
-			       <&apps_smmu 0x71d 0>,
-			       <&apps_smmu 0x71e 0>;
+			/* iommus = <&apps_smmu 0x713 0>, */
+			iommus = <&apps_smmu 0x71c 0>,
+			       <&apps_smmu 0x71d 0>;
+				  /* <&apps_smmu 0x71e 0>;*/
 			qcom,iommu-vmid = <0x9>; /* VMID_CP_BITSTREAM */
 			virtual-addr = <0x60200000>;
 			virtual-size = <0x40000000>;
