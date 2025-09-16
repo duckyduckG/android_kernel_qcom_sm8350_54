@@ -8,6 +8,7 @@
 #include <linux/of_address.h>
 #include <linux/platform_device.h>
 #include <linux/slab.h>
+#include <linux/termios.h>
 #include <linux/rpmsg.h>
 #include <linux/idr.h>
 #include <linux/sizes.h>
@@ -229,6 +230,8 @@ enum {
  * @intent_req_lock: Synchronises multiple intent requests
  * @intent_req_result: Result of intent request
  * @intent_req_comp: Completion for intent_req signalling
+ * @lsigs:	local side signals
+ * @rsigs:	remote side signals
  */
 struct glink_channel {
 	struct rpmsg_endpoint ept;
@@ -254,15 +257,15 @@ struct glink_channel {
 	int buf_offset;
 	int buf_size;
 
-	unsigned int lsigs;
-	unsigned int rsigs;
-
 	struct completion open_ack;
 	struct completion open_req;
 
 	struct mutex intent_req_lock;
 	bool intent_req_result;
 	struct completion intent_req_comp;
+
+	unsigned int lsigs;
+	unsigned int rsigs;
 };
 
 #define to_glink_channel(_ept) container_of(_ept, struct glink_channel, ept)
@@ -285,6 +288,11 @@ static const struct rpmsg_endpoint_ops glink_endpoint_ops;
 #define SPI_CMD_READ_NOTIF		13
 #define SPI_CMD_SIGNALS			14
 #define SPI_CMD_TX_SHORT_DATA		17
+
+#define NATIVE_DTR_SIG			BIT(31)
+#define NATIVE_CTS_SIG			BIT(30)
+#define NATIVE_CD_SIG			BIT(29)
+#define NATIVE_RI_SIG			BIT(28)
 
 static void glink_spi_rx_done_work(struct work_struct *work);
 static void glink_spi_remove(struct glink_spi *glink);
@@ -1673,6 +1681,17 @@ static int glink_spi_send_signals(struct glink_spi *glink,
 {
 	struct glink_msg msg;
 
+	/* convert signals from TIOCM to NATIVE */
+	sigs &= 0x0fff;
+	if (sigs & TIOCM_DTR)
+		sigs |= NATIVE_DTR_SIG;
+	if (sigs & TIOCM_RTS)
+		sigs |= NATIVE_CTS_SIG;
+	if (sigs & TIOCM_CD)
+		sigs |= NATIVE_CD_SIG;
+	if (sigs & TIOCM_RI)
+		sigs |= NATIVE_RI_SIG;
+
 	msg.cmd = cpu_to_le16(SPI_CMD_SIGNALS);
 	msg.param1 = cpu_to_le16(channel->lcid);
 	msg.param2 = cpu_to_le32(sigs);
@@ -1697,31 +1716,59 @@ static int glink_spi_handle_signals(struct glink_spi *glink,
 	}
 
 	old = channel->rsigs;
+
+	/* convert signals from NATIVE to TIOCM */
+	if (signals & NATIVE_DTR_SIG)
+		signals |= TIOCM_DSR;
+	if (signals & NATIVE_CTS_SIG)
+		signals |= TIOCM_CTS;
+	if (signals & NATIVE_CD_SIG)
+		signals |= TIOCM_CD;
+	if (signals & NATIVE_RI_SIG)
+		signals |= TIOCM_RI;
+	signals &= 0x0fff;
+
 	channel->rsigs = signals;
 
-	if (channel->ept.sig_cb)
-		channel->ept.sig_cb(channel->ept.rpdev, old, channel->rsigs);
-
 	CH_INFO(channel, "old:%d new:%d\n", old, channel->rsigs);
+	if (channel->ept.sig_cb) {
+		channel->ept.sig_cb(channel->ept.rpdev, channel->ept.priv,
+				    old, channel->rsigs);
+	}
 
 	return 0;
 }
 
-static int glink_spi_get_sigs(struct rpmsg_endpoint *ept,
-			      u32 *lsigs, u32 *rsigs)
+static int glink_spi_get_sigs(struct rpmsg_endpoint *ept)
 {
 	struct glink_channel *channel = to_glink_channel(ept);
 
-	*lsigs = channel->lsigs;
-	*rsigs = channel->rsigs;
-
-	return 0;
+	return channel->rsigs;
 }
 
-static int glink_spi_set_sigs(struct rpmsg_endpoint *ept, u32 sigs)
+static int glink_spi_set_sigs(struct rpmsg_endpoint *ept, u32 set, u32 clear)
 {
 	struct glink_channel *channel = to_glink_channel(ept);
 	struct glink_spi *glink = channel->glink;
+	u32 sigs = channel->lsigs;
+
+	if (set & TIOCM_DTR)
+		sigs |= TIOCM_DTR;
+	if (set & TIOCM_RTS)
+		sigs |= TIOCM_RTS;
+	if (set & TIOCM_CD)
+		sigs |= TIOCM_CD;
+	if (set & TIOCM_RI)
+		sigs |= TIOCM_RI;
+
+	if (clear & TIOCM_DTR)
+		sigs &= ~TIOCM_DTR;
+	if (clear & TIOCM_RTS)
+		sigs &= ~TIOCM_RTS;
+	if (clear & TIOCM_CD)
+		sigs &= ~TIOCM_CD;
+	if (clear & TIOCM_RI)
+		sigs &= ~TIOCM_RI;
 
 	channel->lsigs = sigs;
 
@@ -1761,8 +1808,8 @@ static const struct rpmsg_endpoint_ops glink_endpoint_ops = {
 	.destroy_ept = glink_spi_destroy_ept,
 	.send = glink_spi_send,
 	.trysend = glink_spi_trysend,
-	.get_sigs = glink_spi_get_sigs,
-	.set_sigs = glink_spi_set_sigs,
+	.get_signals = glink_spi_get_sigs,
+	.set_signals = glink_spi_set_sigs,
 };
 
 static void glink_spi_rpdev_release(struct device *dev)
