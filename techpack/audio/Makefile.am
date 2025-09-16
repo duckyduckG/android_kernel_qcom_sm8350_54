@@ -21,9 +21,6 @@ endif
 ifeq ($(TARGET_SUPPORT), qcs6490)
 KBUILD_OPTIONS += CONFIG_ARCH_LAHAINA=y
 endif
-ifeq ($(TARGET_SUPPORT),sdm845)
-KBUILD_OPTIONS += CONFIG_ARCH_SDM845=y
-endif
 
 subdir-ccflags-y += -I$(AUDIO_ROOT)/include/uapi/
 

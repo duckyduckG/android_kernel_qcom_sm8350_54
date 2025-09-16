@@ -141,11 +141,6 @@ COMMON_INC :=	-I$(AUDIO_ROOT)/$(COMMON_DIR)
 
 MACHINE_OBJS += msm-common.o
 
-# for SDM845 sound card driver
-ifdef CONFIG_SND_SOC_SDM845
-	MACHINE_OBJS += sdm845.o
-endif
-
 # for SM8150 sound card driver
 ifdef CONFIG_SND_SOC_SM8150
 	MACHINE_OBJS += sm8150.o
@@ -303,9 +298,6 @@ endif
 # Module information used by KBuild framework
 obj-$(CONFIG_SND_SOC_QDSP6V2) += platform_dlkm.o
 platform_dlkm-y := $(PLATFORM_OBJS)
-
-obj-$(CONFIG_SND_SOC_SDM845) += machine_dlkm.o
-machine_dlkm-y := $(MACHINE_OBJS)
 
 obj-$(CONFIG_SND_SOC_SM8150) += machine_dlkm.o
 machine_dlkm-y := $(MACHINE_OBJS)
