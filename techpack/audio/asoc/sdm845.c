@@ -4050,7 +4050,7 @@ static int sdm845_notifier_service_cb(struct notifier_block *this,
 	struct snd_soc_card *card = NULL;
 	const char *be_dl_name = LPASS_BE_SLIMBUS_0_RX;
 	struct snd_soc_pcm_runtime *rtd;
-	struct snd_soc_component *component;
+	struct snd_soc_component *component = NULL;
 	struct snd_soc_dai *codec_dai;
 	struct msm_asoc_mach_data *pdata;
 
