@@ -48,7 +48,7 @@ SND_SOC_DAILINK_DEFS(multimedia3,
 #if defined(CONFIG_ARCH_SDM845)
 SND_SOC_DAILINK_DEFS(slimbus_0_hostless,
 	DAILINK_COMP_ARRAY(COMP_CPU("SLIMBUS0_HOSTLESS")),
-	DAILINK_COMP_ARRAY(COMP_CODEC("snd-soc-dummy-dai", "snd-soc-dummy")),
+	DAILINK_COMP_ARRAY(COMP_CODEC("snd-soc-dummy", "snd-soc-dummy-dai")),
 	DAILINK_COMP_ARRAY(COMP_PLATFORM("msm-pcm-hostless")));
 #endif
 
@@ -75,17 +75,17 @@ SND_SOC_DAILINK_DEFS(auxpcm_hostless,
 #if defined(CONFIG_ARCH_SDM845)
 SND_SOC_DAILINK_DEFS(slimbus_1_hostless,
 	DAILINK_COMP_ARRAY(COMP_CPU("SLIMBUS1_HOSTLESS")),
-	DAILINK_COMP_ARRAY(COMP_CODEC("snd-soc-dummy-dai", "snd-soc-dummy")),
+	DAILINK_COMP_ARRAY(COMP_CODEC("snd-soc-dummy", "snd-soc-dummy-dai")),
 	DAILINK_COMP_ARRAY(COMP_PLATFORM("msm-pcm-hostless")));
 
 SND_SOC_DAILINK_DEFS(slimbus_3_hostless,
 	DAILINK_COMP_ARRAY(COMP_CPU("SLIMBUS3_HOSTLESS")),
-	DAILINK_COMP_ARRAY(COMP_CODEC("snd-soc-dummy-dai", "snd-soc-dummy")),
+	DAILINK_COMP_ARRAY(COMP_CODEC("snd-soc-dummy", "snd-soc-dummy-dai")),
 	DAILINK_COMP_ARRAY(COMP_PLATFORM("msm-pcm-hostless")));
 
 SND_SOC_DAILINK_DEFS(slimbus_4_hostless,
 	DAILINK_COMP_ARRAY(COMP_CPU("SLIMBUS4_HOSTLESS")),
-	DAILINK_COMP_ARRAY(COMP_CODEC("snd-soc-dummy-dai", "snd-soc-dummy")),
+	DAILINK_COMP_ARRAY(COMP_CODEC("snd-soc-dummy", "snd-soc-dummy-dai")),
 	DAILINK_COMP_ARRAY(COMP_PLATFORM("msm-pcm-hostless")));
 #endif
 
@@ -242,7 +242,7 @@ SND_SOC_DAILINK_DEFS(slimbus7_hostless,
 #else
 SND_SOC_DAILINK_DEFS(slimbus7_hostless,
 	DAILINK_COMP_ARRAY(COMP_CPU("SLIMBUS7_HOSTLESS")),
-	DAILINK_COMP_ARRAY(COMP_CODEC("snd-soc-dummy-dai", "snd-soc-dummy")),
+	DAILINK_COMP_ARRAY(COMP_CODEC("snd-soc-dummy", "snd-soc-dummy-dai")),
 	DAILINK_COMP_ARRAY(COMP_PLATFORM("msm-pcm-hostless")));
 #endif
 
@@ -308,7 +308,7 @@ SND_SOC_DAILINK_DEFS(multimedia21,
 #else
 SND_SOC_DAILINK_DEFS(multimedia21,
 	DAILINK_COMP_ARRAY(COMP_CPU("MultiMedia21")),
-	DAILINK_COMP_ARRAY(COMP_CODEC("snd-soc-dummy-dai", "snd-soc-dummy")),
+	DAILINK_COMP_ARRAY(COMP_CODEC("snd-soc-dummy", "snd-soc-dummy-dai")),
 	DAILINK_COMP_ARRAY(COMP_PLATFORM("msm-pcm-dsp.1")));
 #endif
 
@@ -405,7 +405,7 @@ SND_SOC_DAILINK_DEFS(multimedia22,
 #else
 SND_SOC_DAILINK_DEFS(multimedia22,
 	DAILINK_COMP_ARRAY(COMP_CPU("MultiMedia22")),
-	DAILINK_COMP_ARRAY(COMP_CODEC("snd-soc-dummy-dai", "snd-soc-dummy")),
+	DAILINK_COMP_ARRAY(COMP_CODEC("snd-soc-dummy", "snd-soc-dummy-dai")),
 	DAILINK_COMP_ARRAY(COMP_PLATFORM("msm-pcm-dsp.1")));
 #endif
 
