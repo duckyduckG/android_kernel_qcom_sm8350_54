@@ -6735,7 +6735,6 @@ static int msm_init_wsa_dev(struct platform_device *pdev,
 	u32 wsa_dev_cnt;
 	int i;
 	struct msm_wsa881x_dev_info *wsa881x_dev_info;
-	struct snd_soc_component *component;
 	struct snd_soc_dai_link_component *dlc;
 	const char *wsa_auxdev_name_prefix[1];
 	char *dev_name_str = NULL;
@@ -6833,7 +6832,7 @@ static int msm_init_wsa_dev(struct platform_device *pdev,
 		}
 		dlc->of_node = wsa_of_node;
 		dlc->name = NULL;
-		if (soc_find_component_locked(dlc)) {
+		if (soc_find_component(dlc)) {
 			/* WSA device registered with ALSA core */
 			wsa881x_dev_info[found].of_node = wsa_of_node;
 			wsa881x_dev_info[found].index = i;
