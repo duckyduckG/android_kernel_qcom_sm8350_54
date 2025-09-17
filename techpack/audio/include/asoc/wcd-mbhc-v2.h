@@ -448,6 +448,10 @@ struct wcd_mbhc_config {
 	bool usbc_analog_legacy;
 	bool moisture_duty_cycle_en;
 	struct usbc_ana_audio_config usbc_analog_cfg;
+#if defined(CONFIG_MACH_XIAOMI_SDM845)
+	void (*enable_dual_adc_gpio)(struct device_node *node, bool en);
+	struct device_node *dual_adc_gpio_node;
+#endif
 };
 
 struct wcd_mbhc_intr {
