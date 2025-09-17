@@ -120,7 +120,6 @@ static inline u32 gic_read_rpr(void)
 }
 
 #define gic_read_typer(c)		readq_relaxed(c)
-#define gic_read_irouter(c)		readq_relaxed_no_log(c)
 #define gic_write_irouter(v, c)		writeq_relaxed(v, c)
 #define gic_read_lpir(c)		readq_relaxed(c)
 #define gic_write_lpir(v, c)		writeq_relaxed(v, c)
