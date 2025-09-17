@@ -6575,18 +6575,18 @@ static int msm_populate_dai_link_component_of_node(
 	}
 
 	for (i = 0; i < card->num_links; i++) {
-		if (dai_link[i].platform_of_node && dai_link[i].cpu_of_node)
+		if (dai_link[i].platforms->of_node && dai_link[i].cpus->of_node)
 			continue;
 
 		/* populate platform_of_node for snd card dai links */
-		if (dai_link[i].platform_name &&
-		    !dai_link[i].platform_of_node) {
+		if (dai_link[i].platforms->name &&
+		    !dai_link[i].platforms->of_node) {
 			index = of_property_match_string(cdev->of_node,
 						"asoc-platform-names",
-						dai_link[i].platform_name);
+						dai_link[i].platforms->name);
 			if (index < 0) {
 				pr_err("%s: No match found for platform name: %s\n",
-					__func__, dai_link[i].platform_name);
+					__func__, dai_link[i].platforms->name);
 				ret = index;
 				goto err;
 			}
@@ -6594,52 +6594,52 @@ static int msm_populate_dai_link_component_of_node(
 					      index);
 			if (!np) {
 				pr_err("%s: retrieving phandle for platform %s, index %d failed\n",
-					__func__, dai_link[i].platform_name,
+					__func__, dai_link[i].platforms->name,
 					index);
 				ret = -ENODEV;
 				goto err;
 			}
-			dai_link[i].platform_of_node = np;
-			dai_link[i].platform_name = NULL;
+			dai_link[i].platforms->of_node = np;
+			dai_link[i].platforms->name = NULL;
 		}
 
 		/* populate cpu_of_node for snd card dai links */
-		if (dai_link[i].cpu_dai_name && !dai_link[i].cpu_of_node) {
+		if (dai_link[i].cpus->dai_name && !dai_link[i].cpus->of_node) {
 			index = of_property_match_string(cdev->of_node,
 						 "asoc-cpu-names",
-						 dai_link[i].cpu_dai_name);
+						 dai_link[i].cpus->dai_name);
 			if (index >= 0) {
 				np = of_parse_phandle(cdev->of_node, "asoc-cpu",
 						index);
 				if (!np) {
 					pr_err("%s: retrieving phandle for cpu dai %s failed\n",
 						__func__,
-						dai_link[i].cpu_dai_name);
+						dai_link[i].cpus->dai_name);
 					ret = -ENODEV;
 					goto err;
 				}
-				dai_link[i].cpu_of_node = np;
-				dai_link[i].cpu_dai_name = NULL;
+				dai_link[i].cpus->of_node = np;
+				dai_link[i].cpus->dai_name = NULL;
 			}
 		}
 
 		/* populate codec_of_node for snd card dai links */
-		if (dai_link[i].codec_name && !dai_link[i].codec_of_node) {
+		if (dai_link[i].codecs->name && !dai_link[i].codecs->of_node) {
 			index = of_property_match_string(cdev->of_node,
 						 "asoc-codec-names",
-						 dai_link[i].codec_name);
+						 dai_link[i].codecs->name);
 			if (index < 0)
 				continue;
 			np = of_parse_phandle(cdev->of_node, "asoc-codec",
 					      index);
 			if (!np) {
 				pr_err("%s: retrieving phandle for codec %s failed\n",
-					__func__, dai_link[i].codec_name);
+					__func__, dai_link[i].codecs->name);
 				ret = -ENODEV;
 				goto err;
 			}
-			dai_link[i].codec_of_node = np;
-			dai_link[i].codec_name = NULL;
+			dai_link[i].codecs->of_node = np;
+			dai_link[i].codecs->name = NULL;
 		}
 	}
 
@@ -6960,10 +6960,15 @@ static int msm_init_wsa_dev(struct platform_device *pdev,
 	u32 wsa_dev_cnt;
 	int i;
 	struct msm_wsa881x_dev_info *wsa881x_dev_info;
+	struct snd_soc_dai_link_component *dlc;
 	const char *wsa_auxdev_name_prefix[1];
 	char *dev_name_str = NULL;
 	int found = 0;
 	int ret = 0;
+
+	dlc = devm_kcalloc(&pdev->dev, 1,
+			sizeof(struct snd_soc_dai_link_component),
+			GFP_KERNEL);
 
 	/* Get maximum WSA device count for this platform */
 	ret = of_property_read_u32(pdev->dev.of_node,
@@ -7050,7 +7055,9 @@ static int msm_init_wsa_dev(struct platform_device *pdev,
 			ret = -EINVAL;
 			goto err_free_dev_info;
 		}
-		if (soc_find_component_locked(wsa_of_node, NULL)) {
+		dlc->of_node = wsa_of_node;
+		dlc->name = NULL;
+		if (soc_find_component_locked(dlc)) {
 			/* WSA device registered with ALSA core */
 			wsa881x_dev_info[found].of_node = wsa_of_node;
 			wsa881x_dev_info[found].index = i;
@@ -7112,9 +7119,9 @@ static int msm_init_wsa_dev(struct platform_device *pdev,
 		}
 
 		snprintf(dev_name_str, strlen("wsa881x.%d"), "wsa881x.%d", i);
-		msm_aux_dev[i].name = dev_name_str;
-		msm_aux_dev[i].codec_name = NULL;
-		msm_aux_dev[i].codec_of_node =
+		msm_aux_dev[i].dlc.name = dev_name_str;
+		msm_aux_dev[i].dlc.dai_name = NULL;
+		msm_aux_dev[i].dlc.of_node =
 					wsa881x_dev_info[i].of_node;
 		msm_aux_dev[i].init = msm_wsa881x_init;
 		msm_codec_conf[i].dev_name = NULL;
