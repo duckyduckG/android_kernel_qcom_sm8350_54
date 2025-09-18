@@ -20,6 +20,11 @@
 #include <linux/power_supply.h>
 #include <linux/thermal.h>
 
+#if 0
+#undef pr_debug
+#define pr_debug pr_err
+#endif
+
 #include "../thermal_core.h"
 
 #define BCL_DRIVER_NAME       "bcl_peripheral"
@@ -72,6 +77,7 @@ struct bcl_peripheral_data {
 	int                     last_val;
 	struct mutex            state_trans_lock;
 	bool			irq_enabled;
+	struct device				*dev;
 	struct thermal_zone_of_device_ops ops;
 	struct thermal_zone_device *tz_dev;
 };
@@ -425,7 +431,7 @@ static irqreturn_t bcl_handle_ibat(int irq, void *data)
 		goto exit_intr;
 	}
 	mutex_unlock(&perph_data->state_trans_lock);
-	of_thermal_handle_trip(perph_data->tz_dev);
+	of_thermal_handle_trip(perph_data->dev, perph_data->tz_dev);
 
 	return IRQ_HANDLED;
 
@@ -447,7 +453,7 @@ static irqreturn_t bcl_handle_vbat(int irq, void *data)
 		goto exit_intr;
 	}
 	mutex_unlock(&perph_data->state_trans_lock);
-	of_thermal_handle_trip(perph_data->tz_dev);
+	of_thermal_handle_trip(perph_data->dev, perph_data->tz_dev);
 
 	return IRQ_HANDLED;
 
@@ -547,7 +553,7 @@ static void bcl_evaluate_soc(struct work_struct *work)
 
 	perph_data->trip_val = battery_percentage;
 	mutex_unlock(&perph_data->state_trans_lock);
-	of_thermal_handle_trip(perph_data->tz_dev);
+	of_thermal_handle_trip(perph_data->dev, perph_data->tz_dev);
 
 	return;
 eval_exit:
@@ -614,6 +620,7 @@ static void bcl_probe_soc(struct platform_device *pdev)
 
 	soc_data = &bcl_perph->param[BCL_SOC_MONITOR];
 	mutex_init(&soc_data->state_trans_lock);
+	soc_data->dev = &pdev->dev;
 	soc_data->ops.get_temp = bcl_read_soc;
 	soc_data->ops.set_trips = bcl_set_soc;
 	INIT_WORK(&bcl_perph->soc_eval_work, bcl_evaluate_soc);
