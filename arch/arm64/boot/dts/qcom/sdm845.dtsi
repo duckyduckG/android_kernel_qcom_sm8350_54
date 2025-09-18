@@ -2308,6 +2308,8 @@
 		reg = <0x01100000 0x200000>, <0x01300000 0x50000>;
 		reg-names = "llcc_base", "llcc_broadcast_base";
 		cap-based-alloc-and-pwr-collapse;
+		clocks = <&clock_aop QDSS_CLK>;
+		clock-names = "qdss_clk";
 
 		LLCC_1: llcc_1_dcache {
 			qcom,dump-size = <0x1141c0>;
