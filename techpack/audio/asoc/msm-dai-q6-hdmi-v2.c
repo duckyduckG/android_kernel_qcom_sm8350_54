@@ -15,7 +15,12 @@
 #include <sound/pcm_params.h>
 #include <dsp/apr_audio-v2.h>
 #include <dsp/q6afe-v2.h>
+
+#if !defined(CONFIG_SND_SOC_QDSP6V2_DAI_LEGACY)
 #include "msm-dai-q6-v2.h"
+#else
+#include "msm-dai-q6-v2_legacy.h"
+#endif
 
 #define HDMI_RX_CA_MAX 0x32
 
