@@ -19,6 +19,12 @@
 
 struct cpufreq_policy;
 
+typedef int (*plat_mitig_t)(int cpu, u32 clip_freq);
+
+struct cpu_cooling_ops {
+	plat_mitig_t ceil_limit, floor_limit;
+};
+
 #ifdef CONFIG_CPU_THERMAL
 /**
  * cpufreq_cooling_register - function to create cpufreq cooling device.
