@@ -1532,7 +1532,8 @@ __init *thermal_of_build_thermal_zone(struct device_node *np)
 	ret = of_count_phandle_with_args(np, "thermal-sensors",
 						"#thermal-sensor-cells");
 	if (ret < 0) {
-		pr_err("%pKOFn: missing thermal-sensors property\n", np);
+		pr_err("Thermal zone '%s' is missing the thermal-sensors property\n",
+			of_node_full_name(np));
 		goto free_tz;
 	}
 	tz->num_sensor = ret;
