@@ -1587,6 +1587,16 @@
 		reset-names = "core_reset";
 
 		status = "disabled";
+
+		qos0 {
+			mask = <0x0f>;
+			vote = <70>;
+		};
+
+		qos1 {
+			mask = <0xf0>;
+			vote = <70>;
+		};
 	};
 
 	sdhc_2: sdhci@8804000 {
