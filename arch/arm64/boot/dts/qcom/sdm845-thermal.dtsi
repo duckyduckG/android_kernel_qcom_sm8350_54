@@ -685,6 +685,8 @@
 	};
 };
 
+#include "sdm845-thermal-overlay.dtsi"
+
 &thermal_zones {
 		aoss0-lowf {
 		polling-delay-passive = <0>;
