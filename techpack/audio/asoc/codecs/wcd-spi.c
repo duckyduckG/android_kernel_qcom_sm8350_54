@@ -19,6 +19,9 @@
 #include <sound/wcd-dsp-mgr.h>
 #include <sound/wcd-spi.h>
 #include <soc/wcd-spi-ac.h>
+#if defined(CONFIG_MACH_XIAOMI_SDM845)
+#include <soc/qcom/socinfo.h>
+#endif
 #include "wcd-spi-registers.h"
 
 /* Byte manipulations */
@@ -704,8 +707,20 @@ static int wcd_spi_clk_ctrl(struct spi_device *spi,
 		 */
 		if (test_bit(WCD_SPI_CLK_STATE_ENABLED, &wcd_spi->status_mask))
 			goto done;
+#if defined(CONFIG_MACH_XIAOMI_SDM845)
+		else if (wcd_spi->clk_users == 1) {
+			ret = wcd_spi_clk_enable(spi);
+			if ((get_hw_version_platform() == HARDWARE_PLATFORM_PERSEUS) &&
+			     (get_hw_version_major() == 2) &&
+			     (get_hw_version_minor() == 0)) {
+				if (ret != 0)
+					wcd_spi->clk_users = 0;
+			}
+		}
+#else
 		else if (wcd_spi->clk_users == 1)
 			ret = wcd_spi_clk_enable(spi);
+#endif
 
 	} else {
 		wcd_spi->clk_users--;

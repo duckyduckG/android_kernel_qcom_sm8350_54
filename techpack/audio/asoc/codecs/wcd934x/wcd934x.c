@@ -6243,6 +6243,44 @@ static int tavil_mad_input_put(struct snd_kcontrol *kcontrol,
 		"%s: tavil input widget = %s, adc_input = %s\n", __func__,
 		mad_input_widget, is_adc_input ? "true" : "false");
 
+#if defined(CONFIG_MACH_XIAOMI_SDM845)
+	if (!strcmp("AMIC2", mad_input_widget)) {
+		mic_bias_found = 2;
+		dev_info(component->dev,
+			"%s: tavil input widget = %s, enable MIC BIAS2 directly.\n",
+			__func__, mad_input_widget);
+	} else {
+		for (i = 0; i < card->num_of_dapm_routes; i++) {
+			if (!strcmp(card->of_dapm_routes[i].sink, mad_input_widget)) {
+				source_widget = card->of_dapm_routes[i].source;
+				if (!source_widget) {
+					dev_err(component->dev,
+						"%s: invalid source widget\n",
+						__func__);
+					return -EINVAL;
+				}
+
+				if (strnstr(source_widget,
+					"MIC BIAS1", sizeof("MIC BIAS1"))) {
+					mic_bias_found = 1;
+					break;
+				} else if (strnstr(source_widget,
+					"MIC BIAS2", sizeof("MIC BIAS2"))) {
+					mic_bias_found = 2;
+					break;
+				} else if (strnstr(source_widget,
+					"MIC BIAS3", sizeof("MIC BIAS3"))) {
+					mic_bias_found = 3;
+					break;
+				} else if (strnstr(source_widget,
+					"MIC BIAS4", sizeof("MIC BIAS4"))) {
+					mic_bias_found = 4;
+					break;
+				}
+			}
+		}
+	}
+#else
 	for (i = 0; i < card->num_of_dapm_routes; i++) {
 		if (!strcmp(card->of_dapm_routes[i].sink, mad_input_widget)) {
 			source_widget = card->of_dapm_routes[i].source;
@@ -6272,6 +6310,7 @@ static int tavil_mad_input_put(struct snd_kcontrol *kcontrol,
 			}
 		}
 	}
+#endif
 
 	if (!mic_bias_found) {
 		dev_err(component->dev, "%s: mic bias not found for input %s\n",
@@ -6460,6 +6499,39 @@ static int tavil_rx_hph_mode_put(struct snd_kcontrol *kcontrol,
 	return 0;
 }
 
+#if defined(CONFIG_MACH_XIAOMI_SDM845)
+static int codec_version_get(struct snd_kcontrol *kcontrol,
+				 struct snd_ctl_elem_value *ucontrol)
+{
+	struct snd_soc_component *component = snd_soc_kcontrol_component(kcontrol);
+	struct tavil_priv *tavil = snd_soc_component_get_drvdata(component);
+
+	struct wcd9xxx *wcd9xxx= tavil->wcd9xxx;
+
+	ucontrol->value.integer.value[0] = 0;
+
+	switch (wcd9xxx->version) {
+	case TAVIL_VERSION_WCD9340_1_0:
+		ucontrol->value.integer.value[0] = 1;
+		break;
+	case TAVIL_VERSION_WCD9341_1_0:
+		ucontrol->value.integer.value[0] = 2;
+		break;
+	case TAVIL_VERSION_WCD9340_1_1:
+		ucontrol->value.integer.value[0] = 3;
+		break;
+	case TAVIL_VERSION_WCD9341_1_1:
+		ucontrol->value.integer.value[0] = 4;
+		break;
+	default:
+		dev_warn(component->dev, "%s:Invalid codec version %d\n",
+			__func__, wcd9xxx->version);
+	}
+
+    return 0;
+}
+#endif
+
 static const char * const rx_hph_mode_mux_text[] = {
 	"CLS_H_INVALID", "CLS_H_HIFI", "CLS_H_LP", "CLS_AB", "CLS_H_LOHIFI",
 	"CLS_H_ULP", "CLS_AB_HIFI",
@@ -6507,6 +6579,13 @@ static const char * const tavil_ear_spkr_pa_gain_text[] = {
 	"G_DEFAULT", "G_0_DB", "G_1_DB", "G_2_DB", "G_3_DB",
 	"G_4_DB", "G_5_DB", "G_6_DB"
 };
+
+#if defined(CONFIG_MACH_XIAOMI_SDM845)
+static const char *const codec_version_text[] = {"Unknown", "WCD9340_v1.0", "WCD9341_v1.0", "WCD9340_v1.1", "WCD9341_v1.1"};
+static const struct soc_enum codec_version[] = {
+	SOC_ENUM_SINGLE_EXT(ARRAY_SIZE(codec_version_text), codec_version_text),
+};
+#endif
 
 static const char * const tavil_speaker_boost_stage_text[] = {
 	"NO_MAX_STATE", "MAX_STATE_1", "MAX_STATE_2"
@@ -6797,6 +6876,10 @@ static const struct snd_kcontrol_new tavil_snd_controls[] = {
 		tavil_amic_pwr_lvl_get, tavil_amic_pwr_lvl_put),
 	SOC_ENUM_EXT("AMIC_5_6 PWR MODE", amic_pwr_lvl_enum,
 		tavil_amic_pwr_lvl_get, tavil_amic_pwr_lvl_put),
+#if defined(CONFIG_MACH_XIAOMI_SDM845)
+	SOC_ENUM_EXT("Codec Version", codec_version,
+		codec_version_get, NULL ),
+#endif
 };
 
 static int tavil_dec_enum_put(struct snd_kcontrol *kcontrol,
