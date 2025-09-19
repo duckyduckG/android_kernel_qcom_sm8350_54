@@ -356,67 +356,6 @@ static int enable_lmh(void)
 	return ret;
 }
 
-static int lmh_set_max_limit(int cpu, u32 freq)
-{
-	struct limits_dcvs_hw *hw = get_dcvsh_hw_from_cpu(cpu);
-	int ret = 0, cpu_idx, idx = 0;
-	u32 max_freq = U32_MAX;
-
-	if (!hw)
-		return -EINVAL;
-
-	mutex_lock(&hw->access_lock);
-	for_each_cpu(cpu_idx, &hw->core_map) {
-		if (cpu_idx == cpu)
-		/*
-		 * If there is no limits restriction for CPU scaling max
-		 * frequency, vote for a very high value. This will allow
-		 * the CPU to use the boost frequencies.
-		 */
-			hw->cdev_data[idx].max_freq =
-				(freq == hw->max_freq[idx]) ? U32_MAX : freq;
-		if (max_freq > hw->cdev_data[idx].max_freq)
-			max_freq = hw->cdev_data[idx].max_freq;
-		idx++;
-	}
-	ret = limits_dcvs_write(hw->affinity, LIMITS_SUB_FN_THERMAL,
-				  LIMITS_FREQ_CAP, max_freq,
-				  (max_freq == U32_MAX) ? 0 : 1, 1);
-	lmh_dcvs_notify(hw);
-	mutex_unlock(&hw->access_lock);
-
-	return ret;
-}
-
-static int lmh_set_min_limit(int cpu, u32 freq)
-{
-	struct limits_dcvs_hw *hw = get_dcvsh_hw_from_cpu(cpu);
-	int cpu_idx, idx = 0, cpu_ct = 0;
-
-	if (!hw)
-		return -EINVAL;
-
-	mutex_lock(&hw->access_lock);
-	for_each_cpu(cpu_idx, &hw->core_map) {
-		if (cpu_idx == cpu)
-			hw->cdev_data[idx].min_freq = freq;
-		if (hw->cdev_data[idx].min_freq <= hw->min_freq[idx])
-			cpu_ct++;
-		idx++;
-	}
-	if (cpu_ct < cpumask_weight(&hw->core_map))
-		writel_relaxed(0x01, hw->min_freq_reg);
-	else
-		writel_relaxed(0x00, hw->min_freq_reg);
-	mutex_unlock(&hw->access_lock);
-
-	return 0;
-}
-static struct cpu_cooling_ops cd_ops = {
-	.ceil_limit = lmh_set_max_limit,
-	.floor_limit = lmh_set_min_limit,
-};
-
 static void register_cooling_device(struct work_struct *work)
 {
 	struct limits_dcvs_hw *hw;
@@ -443,8 +382,7 @@ static void register_cooling_device(struct work_struct *work)
 			hw->cdev_data[idx].max_freq = U32_MAX;
 			hw->cdev_data[idx].min_freq = 0;
 			hw->cdev_data[idx].cdev =
-					cpufreq_platform_cooling_register(
-							policy, &cd_ops);
+					of_cpufreq_cooling_register(policy);
 			if (IS_ERR_OR_NULL(hw->cdev_data[idx].cdev)) {
 				pr_err("CPU:%u cdev register error:%ld\n",
 					cpu, PTR_ERR(hw->cdev_data[idx].cdev));
