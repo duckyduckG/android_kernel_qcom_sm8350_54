@@ -2004,6 +2004,20 @@ int __qcom_scm_lmh_read_buf_size(struct device *dev, int *size)
 	return ret;
 }
 
+int __qcom_scm_lmh_profile_change(struct device *dev, uint32_t profile)
+{
+	struct qcom_scm_desc desc = {
+		.svc = QCOM_SCM_SVC_LMH,
+		.cmd = QCOM_SCM_LMH_PROFILE_CHANGE,
+		.owner = ARM_SMCCC_OWNER_SIP
+	};
+
+	desc.args[0] = profile;
+	desc.arginfo = QCOM_SCM_ARGS(1, QCOM_SCM_VAL);
+
+	return qcom_scm_call(dev, &desc);
+}
+
 int __qcom_scm_lmh_limit_dcvsh(struct device *dev, phys_addr_t payload,
 			uint32_t payload_size, u64 limit_node, uint32_t node_id,
 			u64 version)
