@@ -357,13 +357,6 @@ SND_SOC_DAILINK_DEFS(quat_mi2s_rx_hostless,
 	DAILINK_COMP_ARRAY(COMP_CODEC("snd-soc-dummy", "snd-soc-dummy-dai")),
 	DAILINK_COMP_ARRAY(COMP_PLATFORM("msm-pcm-hostless")));
 
-#if defined(CONFIG_ARCH_SDM845)
-SND_SOC_DAILINK_DEFS(quat_mi2s_tx_hostless_capture,
-	DAILINK_COMP_ARRAY(COMP_CPU("QUAT_MI2S_TX_HOSTLESS")),
-	DAILINK_COMP_ARRAY(COMP_CODEC("snd-soc-dummy", "snd-soc-dummy-dai")),
-	DAILINK_COMP_ARRAY(COMP_PLATFORM("msm-pcm-hostless")));
-#endif
-
 SND_SOC_DAILINK_DEFS(sec_mi2s_tx_hostless,
 	DAILINK_COMP_ARRAY(COMP_CPU("SEC_MI2S_TX_HOSTLESS")),
 	DAILINK_COMP_ARRAY(COMP_CODEC("snd-soc-dummy", "snd-soc-dummy-dai")),
@@ -577,20 +570,12 @@ SND_SOC_DAILINK_DEFS(lpass_be_slimbus_0_tx,
 
 SND_SOC_DAILINK_DEFS(lpass_be_slimbus_1_rx,
 	DAILINK_COMP_ARRAY(COMP_CPU("msm-dai-q6-dev.16386")),
-#if !defined(CONFIG_MACH_XIAOMI_SDM845)
 	DAILINK_COMP_ARRAY(COMP_CODEC("tavil_codec", "tavil_rx1")),
-#else
-	DAILINK_COMP_ARRAY(COMP_CODEC("tavil_codec", "tavil_rx2")),
-#endif
 	DAILINK_COMP_ARRAY(COMP_PLATFORM("msm-pcm-routing")));
 
 SND_SOC_DAILINK_DEFS(lpass_be_slimbus_1_tx,
 	DAILINK_COMP_ARRAY(COMP_CPU("msm-dai-q6-dev.16387")),
-#if !defined(CONFIG_MACH_XIAOMI_SDM845)
 	DAILINK_COMP_ARRAY(COMP_CODEC("tavil_codec", "tavil_tx3")),
-#else
-	DAILINK_COMP_ARRAY(COMP_CODEC("tavil_codec", "tavil_tx2")),
-#endif
 	DAILINK_COMP_ARRAY(COMP_PLATFORM("msm-pcm-routing")));
 
 SND_SOC_DAILINK_DEFS(lpass_be_slimbus_2_rx,
@@ -605,11 +590,7 @@ SND_SOC_DAILINK_DEFS(lpass_be_slimbus_3_rx,
 
 SND_SOC_DAILINK_DEFS(lpass_be_slimbus_3_tx,
 	DAILINK_COMP_ARRAY(COMP_CPU("msm-dai-q6-dev.16391")),
-#if !defined(CONFIG_MACH_XIAOMI_SDM845)
 	DAILINK_COMP_ARRAY(COMP_CODEC("tavil_codec", "tavil_tx1")),
-#else
-	DAILINK_COMP_ARRAY(COMP_CODEC("tavil_codec", "tavil_tx3")),
-#endif
 	DAILINK_COMP_ARRAY(COMP_PLATFORM("msm-pcm-routing")));
 
 SND_SOC_DAILINK_DEFS(lpass_be_slimbus_4_rx,
@@ -1113,17 +1094,10 @@ SND_SOC_DAILINK_DEFS(tert_mi2s_tx,
 	DAILINK_COMP_ARRAY(COMP_CODEC("msm-stub-codec.1", "msm-stub-tx")),
 	DAILINK_COMP_ARRAY(COMP_PLATFORM("msm-pcm-routing")));
 
-#if !defined(CONFIG_MACH_XIAOMI_SDM845)
 SND_SOC_DAILINK_DEFS(quat_mi2s_rx,
 	DAILINK_COMP_ARRAY(COMP_CPU("msm-dai-q6-mi2s.6")),
 	DAILINK_COMP_ARRAY(COMP_CODEC("msm-stub-codec.1", "msm-stub-rx")),
 	DAILINK_COMP_ARRAY(COMP_PLATFORM("msm-pcm-routing")));
-#else
-SND_SOC_DAILINK_DEFS(quat_mi2s_rx_tas2559,
-	DAILINK_COMP_ARRAY(COMP_CPU("msm-dai-q6-mi2s.3")),
-	DAILINK_COMP_ARRAY(COMP_CODEC("tas2559.2-004c", "tas2559 ASI1")),
-	DAILINK_COMP_ARRAY(COMP_PLATFORM("msm-pcm-routing")));
-#endif
 
 SND_SOC_DAILINK_DEFS(quat_mi2s_tx,
 	DAILINK_COMP_ARRAY(COMP_CPU("msm-dai-q6-mi2s.7")),

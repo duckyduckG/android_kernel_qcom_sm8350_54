@@ -9103,9 +9103,6 @@ static bool is_port_valid(u16 port_id)
 	case SLIMBUS_2_RX:
 	case SLIMBUS_2_TX:
 	case SLIMBUS_3_RX:
-#if defined(CONFIG_MACH_XIAOMI_SDM845)
-	case SLIMBUS_3_TX:
-#endif
 	case INT_BT_SCO_RX:
 	case INT_BT_SCO_TX:
 	case INT_BT_A2DP_RX:
