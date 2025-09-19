@@ -241,15 +241,17 @@ static int limits_dcvs_write(uint32_t node_id, uint32_t fn,
 			      bool enable_val1)
 {
 	int ret;
-	struct scm_desc desc_arg;
 	uint32_t *payload = NULL;
 	uint32_t payload_len;
+	phys_addr_t payload_r;
+	uint32_t payload_size;
+	u64 lmh_node;
 
 	payload_len = ((enable_val1) ? 6 : 5) * sizeof(uint32_t);
 	payload = kzalloc(payload_len, GFP_KERNEL);
-	if (!payload)
+	if (!payload) {
 		return -ENOMEM;
-
+	}
 	payload[0] = fn; /* algorithm */
 	payload[1] = 0; /* unused sub-algorithm */
 	payload[2] = setting;
@@ -258,16 +260,17 @@ static int limits_dcvs_write(uint32_t node_id, uint32_t fn,
 	if (enable_val1)
 		payload[5] = val1;
 
-	desc_arg.args[0] = SCM_BUFFER_PHYS(payload);
-	desc_arg.args[1] = payload_len;
-	desc_arg.args[2] = LIMITS_NODE_DCVS;
-	desc_arg.args[3] = node_id;
-	desc_arg.args[4] = 0; /* version */
-	desc_arg.arginfo = SCM_ARGS(5, SCM_RO, SCM_VAL, SCM_VAL,
-					SCM_VAL, SCM_VAL);
+	payload_r = virt_to_phys(payload);
+	payload_size = payload_len;
+	lmh_node = LIMITS_NODE_DCVS;
 
 	dmac_flush_range(payload, (void *)payload + payload_len);
-	ret = scm_call2(SCM_SIP_FNID(SCM_SVC_LMH, LIMITS_DCVSH), &desc_arg);
+	ret = qcom_scm_lmh_limit_dcvsh(payload_r, payload_size,
+					lmh_node, node_id, 0);
+	if (ret) {
+		pr_err("LMH DCVS SCM call failed: %d\n", ret);
+	}
+	pr_debug("LMH DCVS SCM call successful: %d\n", ret);
 
 	kfree(payload);
 
@@ -342,16 +345,13 @@ static struct limits_dcvs_hw *get_dcvsh_hw_from_cpu(int cpu)
 static int enable_lmh(void)
 {
 	int ret = 0;
-	struct scm_desc desc_arg;
 
-	desc_arg.args[0] = 1;
-	desc_arg.arginfo = SCM_ARGS(1, SCM_VAL);
-	ret = scm_call2(SCM_SIP_FNID(SCM_SVC_LMH, LIMITS_PROFILE_CHANGE),
-			&desc_arg);
+	ret = qcom_scm_lmh_profile_change(1);
 	if (ret) {
 		pr_err("Error switching profile:[1]. err:%d\n", ret);
 		return ret;
 	}
+	pr_debug("switching profile:[1]. profile:%d\n", ret);
 
 	return ret;
 }
